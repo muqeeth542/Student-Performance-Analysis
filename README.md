@@ -3,7 +3,7 @@
 This project is a website (dashboard) that helps you understand how students are performing in their exams. It shows useful data like exam scores, study hours, and attendance in a very simple and beautiful way.
 
 ## What is this project?
-Imagine you have data about many students – their marks, how much they study, and how often they come to school. This dashboard takes all that data and turns it into easy charts and graphs. It helps teachers and parents see what makes a student successful.
+Imagine you have data about many students – their marks, how much they study, and how often they come to school. This dashboard takes all that data and turns it into easy charts and graphs. It helps teachers and parents see what makes a student successful. You just need the data of the students in a csv file.
 
 ## Features (What specific things can you see?)
 - **Total Students & Average Scores:** You can see the total number of students and their average marks at the top.
