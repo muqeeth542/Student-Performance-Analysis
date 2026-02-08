@@ -54,4 +54,9 @@ Since this is a college project, here is a simple explanation of how the Python 
 3.  **Visualization:** Plotly draws the charts based on that data.
 4.  **Output:** Streamlit puts everything (Text, Charts, Tables) together on a webpage.
 
+---
+
+### Access to the Project
+You can access the project at [https://student-performance-analysis-3qxazpfffanfstwdhvknso.streamlit.app/].
+
 
