@@ -5,6 +5,9 @@ This project is a website (dashboard) that helps you understand how students are
 ## What is this project?
 Imagine you have data about many students – their marks, how much they study, and how often they come to school. This dashboard takes all that data and turns it into easy charts and graphs. It helps teachers and parents see what makes a student successful. You just need the data of the students in a csv file.
 
+![Dashboard Screenshot](Images/Dashboard.png)
+![Data](Images/Graphs.png)
+
 ## Features (What specific things can you see?)
 - **Total Students & Average Scores:** You can see the total number of students and their average marks at the top.
 - **Study Hours & Attendance:** Check if studying more leads to better marks.
@@ -12,6 +15,8 @@ Imagine you have data about many students – their marks, how much they study, 
 - **Parental Involvement:** See if parents helping their kids improves their scores.
 - **Cool Dark Theme:** The website has a modern dark purple look which is very pleasing to the eyes.
 - **Detailed Data:** At the bottom, you can see the full list of student details.
+
+
 
 ## How to Run this Project on your Computer
 
