@@ -2,6 +2,15 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import pickle
+import numpy as np
+
+with open("model.pkl", "rb") as f:
+    data = pickle.load(f)
+
+model = data["model"]
+feature_columns = data["features"]
+
 
 # --- Page Configuration ---
 st.set_page_config(
@@ -179,7 +188,7 @@ st.markdown("""
 @st.cache_data
 def load_data():
     try:
-        df = pd.read_csv("Data/StudentPerformanceFactors.csv")
+        df = pd.read_csv("data/StudentPerformanceFactors.csv")
         return df
     except FileNotFoundError:
         return None
@@ -187,8 +196,9 @@ def load_data():
 df = load_data()
 
 if df is None:
-    st.error("Data file not found. Please ensure 'Data/StudentPerformanceFactors.csv' exists.")
+    st.error("Data file not found. Please ensure 'data/StudentPerformanceFactors.csv' exists.")
     st.stop()
+
 
 # --- Sidebar ---
 st.sidebar.markdown(
@@ -199,6 +209,23 @@ st.sidebar.markdown(
     </div>
     """,
     unsafe_allow_html=True
+)
+
+st.sidebar.subheader("🎯 Predict Exam Score")
+
+attendance = st.sidebar.slider("Attendance (%)", 50, 100, 75)
+hours_studied = st.sidebar.slider("Hours Studied per Day", 0, 10, 4)
+sleep_hours = st.sidebar.slider("Sleep Hours", 4, 10, 7)
+previous_scores = st.sidebar.slider("Previous Exam Score", 0, 100, 70)
+
+motivation = st.sidebar.selectbox(
+    "Motivation Level",
+    ["Low", "Medium", "High"]
+)
+
+tutoring_sessions = st.sidebar.selectbox(
+    "Tutoring Sessions",
+    ["No", "Yes"]
 )
 
 st.sidebar.caption("DASHBOARD FILTERS")
@@ -241,6 +268,22 @@ st.sidebar.markdown(
 df_selection = df.query(
     "Gender == @gender_filter & School_Type == @school_type_filter & Parental_Involvement == @parental_involvement_filter"
 )
+
+input_data = {
+    "Attendance": attendance,
+    "Hours_Studied": hours_studied,
+    "Sleep_Hours": sleep_hours,
+    "Previous_Scores": previous_scores,
+    "Motivation_Level_Medium": 1 if motivation == "Medium" else 0,
+    "Motivation_Level_High": 1 if motivation == "High" else 0,
+    "Tutoring_Sessions_Yes": 1 if tutoring_sessions == "Yes" else 0
+}
+
+input_df = pd.DataFrame([input_data])
+input_df = input_df.reindex(columns=feature_columns, fill_value=0)
+prediction = model.predict(input_df)[0]
+
+
 
 # --- Main Dashboard ---
 
@@ -297,6 +340,15 @@ st.markdown("<br>", unsafe_allow_html=True)
 # --- Charts ---
 
 # Helper for wrapping charts
+st.markdown(f"""
+<div class="kpi-card" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%); border: 1px solid rgba(139, 92, 246, 0.3); text-align: center; margin-bottom: 2rem; padding: 2rem; box-shadow: 0 10px 30px -5px rgba(99, 102, 241, 0.2);">
+    <div style="font-size: 1.2rem; font-weight: 700; color: #cbd5e1; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.1em;">Predicted Exam Score</div>
+    <div style="font-size: 4.5rem; font-weight: 900; line-height: 1; background: linear-gradient(to right, #818cf8, #c084fc, #f472b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.4));">
+        {prediction:.2f}
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
 def chart_wrapper(title, subtitle, chart_obj):
     st.markdown(f"""
     <div class="chart-section">
