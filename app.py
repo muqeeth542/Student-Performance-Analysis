@@ -189,7 +189,7 @@ st.markdown("""
 @st.cache_data
 def load_data():
     try:
-        df = pd.read_csv("data/StudentPerformanceFactors.csv")
+        df = pd.read_csv("Data/StudentPerformanceFactors.csv")
         return df
     except FileNotFoundError:
         return None
@@ -197,7 +197,7 @@ def load_data():
 df = load_data()
 
 if df is None:
-    st.error("Data file not found. Please ensure 'data/StudentPerformanceFactors.csv' exists.")
+    st.error("Data file not found. Please ensure 'Data/StudentPerformanceFactors.csv' exists.")
     st.stop()
 
 
