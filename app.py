@@ -6,11 +6,7 @@ import pickle
 import numpy as np
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent
-MODEL_PATH = BASE_DIR / "model.pkl"
-DATA_PATH = BASE_DIR / "Data" / "StudentPerformanceFactors.csv"
-
-with MODEL_PATH.open("rb") as f:
+with open("model.pkl", "rb") as f:
     data = pickle.load(f)
 
 model = data["model"]
