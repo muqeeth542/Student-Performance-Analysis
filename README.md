@@ -1,67 +1,156 @@
-# Student Performance Analysis Dashboard
+# Full-Stack Local RAG + 3D Visualization
 
-This project is a website (dashboard) that helps you understand how students are performing in their exams. It shows useful data like exam scores, study hours, and attendance in a very simple and beautiful way.
+This repository now includes a complete Retrieval-Augmented Generation (RAG) application with:
 
-## What is this project?
-Imagine you have data about many students – their marks, how much they study, and how often they come to school. This dashboard takes all that data and turns it into easy charts and graphs. It helps teachers and parents see what makes a student successful. You just need the data of the students in a csv file.
-
-![Dashboard Screenshot](Images/Dashboard.png)
-![Data](Images/Graphs.png)
-
-## Features (What specific things can you see?)
-- **Total Students & Average Scores:** You can see the total number of students and their average marks at the top.
-- **Study Hours & Attendance:** Check if studying more leads to better marks.
-- **Comparisons:** Compare marks between Public and Private schools.
-- **Parental Involvement:** See if parents helping their kids improves their scores.
-- **Cool Dark Theme:** The website has a modern dark purple look which is very pleasing to the eyes.
-- **Detailed Data:** At the bottom, you can see the full list of student details.
-
-
-
-## How to Run this Project on your Computer
-
-Follow these simple steps to run this dashboard:
-
-1.  **Install Python:** Make sure Python is installed on your computer.
-2.  **Install Libraries:** Open your terminal (command prompt) and type this command to install the required tools:
-    ```bash
-    pip install streamlit pandas plotly
-    ```
-3.  **Run the App:** After installing, type this command in the terminal inside the project folder:
-    ```bash
-    streamlit run app.py
-    ```
-4.  **Open in Browser:** The app will automatically open in your web browser.
-
-## Technical Details for Students (How it works)
-
-Since this is a college project, here is a simple explanation of how the Python code turns into a website. We use three main "Magic Tools" (Libraries):
-
-### 1. Streamlit (`import streamlit as st`)
-*   **What it does:** It basically turns your Python script into a website.
-*   **How it works:** Normally, to build a website, you need to learn HTML, CSS, and JavaScript. But with Streamlit, you just write Python functions.
-    *   When you write `st.title("Hello")`, Streamlit automatically creates an `<h1>` HTML tag in the background and shows it on the browser.
-    *   It handles all the frontend design so you can focus on the logic.
-
-### 2. Pandas (`import pandas as pd`)
-*   **What it does:** This is "Excel for Python".
-*   **How it works:** We use it to read the `csv` file (which is just like an Excel sheet).
-    *   It loads the data into a table called a "DataFrame".
-    *   We use it to filter data (e.g., "Show me only Male students") and calculate averages.
-
-### 3. Plotly (`import plotly.express as px`)
-*   **What it does:** It draws the colorful charts.
-*   **How it works:** We give the Pandas data to Plotly, and it creates interactive graphs (you can zoom in, hover over points, etc.). Streamlit then displays these graphs using `st.plotly_chart()`.
-
-### The Flow
-1.  **Input:** Python reads the `data.csv` file.
-2.  **Process:** Pandas cleans and filters the data.
-3.  **Visualization:** Plotly draws the charts based on that data.
-4.  **Output:** Streamlit puts everything (Text, Charts, Tables) together on a webpage.
+- **FastAPI backend** (PDF ingestion, chunking, embeddings, FAISS persistence, retrieval, answer generation)
+- **React + Vite frontend** with **React Three Fiber** 3D embedding graph
+- **Local-first architecture** with **FAISS only** (no external vector DB)
+- **LLM support** for **Ollama** or **OpenAI API**
 
 ---
 
-### Access to the Project
-You can access the project at [https://student-performance-analysis-3qxazpfffanfstwdhvknso.streamlit.app/].
+## Project Structure
 
+```text
+backend/
+  app/
+    api/routes.py
+    core/config.py
+    models/schemas.py
+    services/
+      document_loader.py
+      embeddings.py
+      llm.py
+      rag.py
+      vector_store.py
+    main.py
+  requirements.txt
 
+frontend/
+  src/
+    components/
+      ChatPanel.jsx
+      ThreeGraph.jsx
+      UploadDropzone.jsx
+    lib/api.js
+    styles/app.css
+    App.jsx
+    main.jsx
+  package.json
+  vite.config.js
+```
+
+---
+
+## Backend Features
+
+- `POST /upload` uploads a PDF and indexes chunks.
+- `POST /query` returns full answer + retrieved chunks.
+- `POST /query/stream` streams answer tokens in real time (SSE).
+- `POST /reset` clears FAISS index + metadata.
+- `GET /graph` returns PCA-reduced 3D points for chunk embeddings.
+- Persistent local storage in `backend/storage/`:
+  - `faiss.index`
+  - `metadata.json`
+  - `embeddings.npy`
+
+---
+
+## Frontend Features
+
+- Drag-and-drop PDF upload.
+- Chat interface with streamed response rendering.
+- Typing animation effect for generated answer.
+- “AI is thinking...” loading animation.
+- Optional voice input (Web Speech API).
+- Interactive 3D graph:
+  - zoom/rotate (Orbit controls)
+  - node click to inspect chunk text
+  - highlight top-k retrieved chunks
+
+---
+
+## Prerequisites
+
+- Python 3.10+
+- Node.js 18+
+- npm 9+
+- (Optional for local LLM) [Ollama](https://ollama.com) running locally
+
+---
+
+## Run Backend (FastAPI)
+
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
+
+### Backend Environment Variables (optional)
+
+Create `backend/.env`:
+
+```env
+LLM_PROVIDER=ollama
+OLLAMA_MODEL=llama3.1:8b
+OLLAMA_BASE_URL=http://localhost:11434
+
+# For OpenAI usage:
+# LLM_PROVIDER=openai
+# OPENAI_API_KEY=your_key_here
+# OPENAI_MODEL=gpt-4o-mini
+```
+
+---
+
+## Run Frontend (React + Vite)
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Optional `.env` for frontend:
+
+```env
+VITE_API_URL=http://localhost:8000
+```
+
+Then open: `http://localhost:5173`
+
+---
+
+## API Quick Test
+
+Upload:
+
+```bash
+curl -X POST http://localhost:8000/upload -F "file=@/path/to/file.pdf"
+```
+
+Query:
+
+```bash
+curl -X POST http://localhost:8000/query \
+  -H "Content-Type: application/json" \
+  -d '{"question":"Summarize key points", "top_k":5}'
+```
+
+Reset:
+
+```bash
+curl -X POST http://localhost:8000/reset
+```
+
+---
+
+## Notes
+
+- Embeddings use `sentence-transformers/all-MiniLM-L6-v2` by default.
+- Similarity search is cosine-like via normalized embeddings + FAISS Inner Product index.
+- Chunking is overlap-based for better context retention.
+- The app is local-friendly and optimized for running with Ollama.
